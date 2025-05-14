@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RISK RADAR</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 25px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .stock-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+        }
+        .box {
+            border: 1px solid #333;
+            padding: 14px;
+            text-align: center;
+            border-radius: 6px;
+        }
+        .up {
+            color: #067d00;
+        }
+        .down {
+            color: crimson;
+        }
+        textarea {
+            width: 100%;
+            height: 90px;
+            margin: 12px 0;
+        }
+        button {
+            background-color: #de13f5;
+            color: #a5a4a4;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #stockGraph {
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>RISK RADAR</h1>
+
+    <div id="stockGraph"></div>
+
+    <h2>Live Stock Prices</h2>
+    <div class="stock-list">
+        {% for ticker, info in stock_data.items() %}
+            <div class="box">
+                <h3>{{ info.name }}</h3>
+                <p>${{ "%.2f"|format(info.price) }}</p>
+                <p class="{{ 'up' if info.change >= 0 else 'down' }}">
+                    {{ '+' if info.change >= 0 else '' }}{{ "%.2f"|format(info.change) }}%
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Check Your Portfolio</h2>
+    <form action="/analyze" method="post">
+        <p>Format: TICKER,SHARES (one per line)</p>
+        <textarea name="portfolio" placeholder="AAPL,10&#10;MSFT,5"></textarea>
+        <br>
+        <button type="submit">Calculate Total</button>
+    </form>
+
+    <script>
+        var graphs = {{ graph_json | safe }};
+        Plotly.newPlot('stockGraph', graphs.data, graphs.layout);
+    </script>
+</body>
+</html>
